@@ -1,0 +1,74 @@
+[
+  {
+    "slug": "ho-xuan-huong",
+    "name": "Hồ Xuân Hương",
+    "category": "Tham Quan",
+    "rating": 4.7,
+    "reviewCount": 1248,
+    "address": "Trung tâm Đà Lạt, Lâm Đồng",
+    "hours": "Mở cả ngày",
+    "description": "Hồ nước ngọt lớn nhất Đà Lạt, bao quanh rừng thông và hoa mimosa vàng mùa xuân.",
+    "tags": ["thiên nhiên", "check-in", "đi dạo"],
+    "image": "/images/dalat1.svg"
+  },
+  {
+    "slug": "doi-che-cau-dat",
+    "name": "Đồi Chè Cầu Đất",
+    "category": "Tham Quan",
+    "rating": 4.8,
+    "reviewCount": 933,
+    "address": "Xuân Trường, Đà Lạt",
+    "hours": "05:00 - 18:00",
+    "description": "Đồi chè xanh mướt ở độ cao 1.650m, sương mù buổi sáng tạo cảnh như trời Âu.",
+    "tags": ["săn mây", "thiên nhiên", "mạo hiểm"],
+    "image": "/images/dalat2.svg"
+  },
+  {
+    "slug": "thung-lung-tinh-yeu",
+    "name": "Thung Lũng Tình Yêu",
+    "category": "Tham Quan",
+    "rating": 4.5,
+    "reviewCount": 845,
+    "address": "Đường Mai Anh Đào, Đà Lạt",
+    "hours": "07:30 - 17:00",
+    "description": "Thung lũng xanh với hồ Đa Thiện, vườn hoa đủ màu — điểm đến lý tưởng cho cặp đôi.",
+    "tags": ["lãng mạn", "cặp đôi", "vườn hoa"],
+    "image": "/images/dalat3.svg"
+  },
+  {
+    "slug": "ga-da-lat",
+    "name": "Ga Đà Lạt",
+    "category": "Tham Quan",
+    "rating": 4.9,
+    "reviewCount": 1532,
+    "address": "Quang Trung, Đà Lạt",
+    "hours": "07:00 - 17:30",
+    "description": "Nhà ga đẹp nhất Đông Dương, xây 1938, mái nhọn 3 chóp Pháp độc đáo.",
+    "tags": ["lịch sử", "kiến trúc", "check-in"],
+    "image": "/images/dalat4.svg"
+  },
+  {
+    "slug": "nui-langbiang",
+    "name": "Núi LangBiang",
+    "category": "Tham Quan",
+    "rating": 4.6,
+    "reviewCount": 1176,
+    "address": "Lạc Dương, Lâm Đồng",
+    "hours": "06:00 - 17:00",
+    "description": "Ngọn núi cao nhất vùng (2.169m), leo bộ lên đỉnh ngắm toàn cảnh Đà Lạt kỳ ảo.",
+    "tags": ["trekking", "núi", "săn mây"],
+    "image": "/images/dalat5.svg"
+  },
+  {
+    "slug": "cho-dem-da-lat",
+    "name": "Chợ Đêm Đà Lạt",
+    "category": "Ẩm Thực",
+    "rating": 4.4,
+    "reviewCount": 2044,
+    "address": "Trung tâm Đà Lạt",
+    "hours": "17:00 - 00:00",
+    "description": "Thiên đường ẩm thực 5pm–12am: bánh tráng nướng, bánh mì xíu mại, sữa đậu nành nóng.",
+    "tags": ["ẩm thực", "mua sắm", "đêm"],
+    "image": "/images/dalat1.svg"
+  }
+]
