@@ -1,0 +1,108 @@
+"use client";
+
+import Link from "next/link";
+import { useState } from "react";
+
+const navigation = [
+  { href: "/", label: "Trang Chủ" },
+  { href: "/places", label: "Địa Điểm" },
+  { href: "/itinerary", label: "Lịch Trình" },
+  { href: "/chat", label: "Chat" },
+];
+
+export function Header() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <header className="sticky top-0 z-50 border-b border-pine-500/10 bg-cream/85 backdrop-blur-xl">
+      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-4 px-6 sm:px-10 lg:px-12">
+        <Link href="/" className="group flex items-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-pine-900 text-lg font-bold text-cream shadow-lg shadow-pine-900/20">
+            DL
+          </div>
+          <div>
+            <p className="font-display text-3xl tracking-[0.3em] text-pine-900">ĐÀ LẠT</p>
+            <p className="text-xs uppercase tracking-[0.28em] text-smoke">
+              1500m · Ngàn Hoa · Sương Mù
+            </p>
+          </div>
+        </Link>
+
+        <nav className="hidden items-center gap-8 lg:flex">
+          {navigation.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="text-sm font-medium text-charcoal transition hover:text-pine-700"
+            >
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="hidden items-center gap-3 lg:flex">
+          <Link
+            href="/login"
+            className="rounded-full border border-pine-500/20 px-5 py-2.5 text-sm font-semibold text-pine-900 transition hover:border-pine-500/40 hover:bg-pine-500/5"
+          >
+            Đăng nhập
+          </Link>
+          <Link
+            href="/chat"
+            className="rounded-full bg-pine-700 px-5 py-2.5 text-sm font-semibold text-cream transition hover:bg-pine-900"
+          >
+            Chat AI 🌿
+          </Link>
+        </div>
+
+        <button
+          type="button"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-pine-500/20 text-pine-900 lg:hidden"
+          onClick={() => setIsOpen((value) => !value)}
+          aria-expanded={isOpen}
+          aria-label="Mở menu điều hướng"
+        >
+          <span className="sr-only">Menu</span>
+          <span className="flex flex-col gap-1.5">
+            <span className="h-0.5 w-5 rounded-full bg-current" />
+            <span className="h-0.5 w-5 rounded-full bg-current" />
+            <span className="h-0.5 w-5 rounded-full bg-current" />
+          </span>
+        </button>
+      </div>
+
+      {isOpen ? (
+        <div className="border-t border-pine-500/10 bg-cream px-6 py-5 lg:hidden sm:px-10">
+          <nav className="mx-auto flex max-w-7xl flex-col gap-4">
+            {navigation.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="rounded-2xl px-4 py-3 text-base font-medium text-charcoal transition hover:bg-pine-500/5 hover:text-pine-700"
+                onClick={() => setIsOpen(false)}
+              >
+                {item.label}
+              </Link>
+            ))}
+            <div className="mt-2 flex gap-3">
+              <Link
+                href="/login"
+                className="flex-1 rounded-full border border-pine-500/20 px-5 py-3 text-center text-sm font-semibold text-pine-900"
+                onClick={() => setIsOpen(false)}
+              >
+                Đăng nhập
+              </Link>
+              <Link
+                href="/chat"
+                className="flex-1 rounded-full bg-pine-700 px-5 py-3 text-center text-sm font-semibold text-cream"
+                onClick={() => setIsOpen(false)}
+              >
+                Chat AI
+              </Link>
+            </div>
+          </nav>
+        </div>
+      ) : null}
+    </header>
+  );
+}

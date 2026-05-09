@@ -1,26 +1,154 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&family=Jost:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&display=swap");
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --pine-900: #1a2f0f;
+  --pine-700: #2d5016;
+  --pine-500: #4a7c28;
+  --mist-300: #b8d4c8;
+  --mist-100: #eef5f1;
+  --bloom: #d4748c;
+  --gold: #c9a84c;
+  --earth: #8b5e3c;
+  --cream: #faf8f3;
+  --charcoal: #1c1c1e;
+  --smoke: #6b7280;
+  --background: var(--cream);
+  --foreground: var(--charcoal);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-pine-900: var(--pine-900);
+  --color-pine-700: var(--pine-700);
+  --color-pine-500: var(--pine-500);
+  --color-mist-300: var(--mist-300);
+  --color-mist-100: var(--mist-100);
+  --color-bloom: var(--bloom);
+  --color-gold: var(--gold);
+  --color-earth: var(--earth);
+  --color-cream: var(--cream);
+  --color-charcoal: var(--charcoal);
+  --color-smoke: var(--smoke);
+  --font-sans: "Jost", sans-serif;
+  --font-display: "Cormorant Garamond", serif;
+  --font-heading: "DM Serif Display", serif;
+  --font-accent: "Playfair Display", serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
+  background:
+    radial-gradient(circle at top, rgba(185, 212, 200, 0.26), transparent 34%),
+    linear-gradient(180deg, #fffdfa 0%, var(--cream) 48%, #f7f2eb 100%);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Jost", sans-serif;
+}
+
+.font-display {
+  font-family: "Cormorant Garamond", serif;
+}
+
+.font-heading {
+  font-family: "DM Serif Display", serif;
+}
+
+.font-accent {
+  font-family: "Playfair Display", serif;
+}
+
+::selection {
+  background: rgb(74 124 40 / 0.3);
+  color: var(--pine-900);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--mist-100);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--pine-700);
+  border-radius: 9999px;
+  border: 2px solid var(--mist-100);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.4);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease both;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-dot {
+  animation: pulse-dot 1.4s ease-in-out infinite;
+}
+
+.delay-100 {
+  animation-delay: 0.1s;
+}
+
+.delay-200 {
+  animation-delay: 0.2s;
+}
+
+.delay-300 {
+  animation-delay: 0.3s;
+}
+
+.delay-400 {
+  animation-delay: 0.4s;
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
 }
