@@ -37,6 +37,7 @@ export default function LoginPage() {
           "dalat_user",
           JSON.stringify((data as { profile?: { id: string; name: string; email: string; phone: string; address: string; role: string } }).profile ?? null),
         );
+        window.dispatchEvent(new Event("dalat-user-changed"));
       }
 
       router.push("/");

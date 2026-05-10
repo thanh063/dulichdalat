@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 
 const navigation = [
   { href: "/", label: "Trang Chủ" },
@@ -11,39 +11,67 @@ const navigation = [
   { href: "/chat", label: "Chat" },
 ];
 
+type HeaderUser = {
+  name: string;
+  role: string;
+};
+
+function readStoredUser(): HeaderUser | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    const stored = window.localStorage.getItem("dalat_user");
+    if (!stored) {
+      return null;
+    }
+
+    const parsed = JSON.parse(stored) as { name?: string; role?: string } | null;
+    if (!parsed?.name) {
+      return null;
+    }
+
+    return {
+      name: parsed.name,
+      role: parsed.role || "user",
+    };
+  } catch {
+    return null;
+  }
+}
+
+function subscribeToUserChanges(callback: () => void) {
+  const handler = () => callback();
+
+  window.addEventListener("storage", handler);
+  window.addEventListener("dalat-user-changed", handler as EventListener);
+
+  return () => {
+    window.removeEventListener("storage", handler);
+    window.removeEventListener("dalat-user-changed", handler as EventListener);
+  };
+}
+
 export function Header() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [user, setUser] = useState<{ name: string; role: string } | null>(() => {
-    if (typeof window === "undefined") {
-      return null;
-    }
-
-    try {
-      const stored = window.localStorage.getItem("dalat_user");
-      if (!stored) {
-        return null;
-      }
-
-      const parsed = JSON.parse(stored) as { name?: string; role?: string } | null;
-      if (!parsed?.name) {
-        return null;
-      }
-
-      return {
-        name: parsed.name,
-        role: parsed.role || "user",
-      };
-    } catch {
-      return null;
-    }
-  });
+  const user = useSyncExternalStore(subscribeToUserChanges, readStoredUser, () => null);
 
   function handleLogout() {
     window.localStorage.removeItem("dalat_user");
-    setUser(null);
+    window.dispatchEvent(new Event("dalat-user-changed"));
     setIsOpen(false);
     router.push("/login");
+  }
+
+  function handleLogoutConfirm() {
+    const shouldLogout = window.confirm("Bạn có chắc muốn đăng xuất không?");
+    if (!shouldLogout) {
+      return;
+    }
+
+    handleLogout();
   }
 
   return (
@@ -82,7 +110,7 @@ export function Header() {
               </div>
               <button
                 type="button"
-                onClick={handleLogout}
+                onClick={handleLogoutConfirm}
                 className="rounded-full border border-pine-500/20 px-3 py-1 text-xs font-semibold text-pine-700 transition hover:bg-pine-500/5"
               >
                 Đăng xuất
@@ -141,7 +169,7 @@ export function Header() {
                   </span>
                   <button
                     type="button"
-                    onClick={handleLogout}
+                    onClick={handleLogoutConfirm}
                     className="rounded-full border border-pine-500/20 px-3 py-1 text-xs font-semibold text-pine-700"
                   >
                     Đăng xuất
