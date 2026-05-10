@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import { getSupabaseAdminClient } from "@/lib/chatbot/db";
 
 const requestSchema = z.object({
   email: z.string().email(),
@@ -28,6 +29,28 @@ export async function POST(request: NextRequest) {
   });
 
   if (error) {
+    if (isDevAuthAutoConfirmEnabled() && error.message.toLowerCase().includes("email not confirmed")) {
+      const confirmed = await confirmUserEmail(parsed.data.email);
+
+      if (confirmed) {
+        const retry = await supabase.auth.signInWithPassword({
+          email: parsed.data.email,
+          password: parsed.data.password,
+        });
+
+        if (!retry.error && retry.data.user) {
+          return NextResponse.json({
+            success: true,
+            message: "Đăng nhập thành công.",
+            user: retry.data.user,
+            session: retry.data.session,
+          });
+        }
+
+        return NextResponse.json({ success: false, message: retry.error?.message || "Không thể đăng nhập." });
+      }
+    }
+
     // Return application-level error (200) so frontend can display message
     // without producing a network-level 4xx in the browser console.
     return NextResponse.json({ success: false, message: error.message });
@@ -39,4 +62,31 @@ export async function POST(request: NextRequest) {
     user: data.user,
     session: data.session,
   });
+}
+
+function isDevAuthAutoConfirmEnabled() {
+  return process.env.NODE_ENV !== "production" || process.env.SUPABASE_DISABLE_EMAIL_CONFIRMATION === "true";
+}
+
+async function confirmUserEmail(email: string) {
+  const supabase = getSupabaseAdminClient();
+  if (!supabase) {
+    return false;
+  }
+
+  const { data, error } = await supabase.auth.admin.listUsers({ page: 1, perPage: 100 });
+  if (error) {
+    return false;
+  }
+
+  const matchedUser = data.users.find((user) => user.email?.toLowerCase() === email.toLowerCase());
+  if (!matchedUser) {
+    return false;
+  }
+
+  const updateResult = await supabase.auth.admin.updateUserById(matchedUser.id, {
+    email_confirm: true,
+  });
+
+  return !updateResult.error;
 }
