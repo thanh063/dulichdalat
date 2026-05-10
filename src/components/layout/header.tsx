@@ -59,6 +59,15 @@ export function Header() {
       return null;
     }
   }, [userSnapshot]);
+  const navigationItems = [
+    ...navigation,
+    ...(user?.role === "admin"
+      ? [
+          { href: "/dashboard", label: "Dashboard" },
+          { href: "/admin/bookings", label: "Quản Lý" },
+        ]
+      : []),
+  ];
 
   function handleLogout() {
     window.localStorage.removeItem("dalat_user");
@@ -92,7 +101,7 @@ export function Header() {
         </Link>
 
         <nav className="hidden items-center gap-8 lg:flex">
-          {navigation.map((item) => (
+          {navigationItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -153,7 +162,7 @@ export function Header() {
       {isOpen ? (
         <div className="border-t border-pine-500/10 bg-cream px-6 py-5 lg:hidden sm:px-10">
           <nav className="mx-auto flex max-w-7xl flex-col gap-4">
-            {navigation.map((item) => (
+            {navigationItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}

@@ -40,19 +40,43 @@ type ChatWidgetProps = {
 const greeting =
   "Xin chào! Tôi là trợ lý du lịch Đà Lạt. Hãy cho tôi biết bạn đi mấy ngày, đi với ai và ngân sách bao nhiêu nhé.";
 
-function createSessionId() {
+function getStoredUser() {
   if (typeof window === "undefined") {
-    return "server";
+    return null;
   }
 
-  const stored = window.localStorage.getItem("dalat_sid");
+  try {
+    const stored = window.localStorage.getItem("dalat_user");
+    if (!stored) {
+      return null;
+    }
+
+    const parsed = JSON.parse(stored) as { id?: string } | null;
+    if (!parsed?.id) {
+      return null;
+    }
+
+    return { id: parsed.id };
+  } catch {
+    return null;
+  }
+}
+
+function createSessionId() {
+  if (typeof window === "undefined") {
+    return { id: "server", userId: null as string | null };
+  }
+
+  const user = getStoredUser();
+  const storageKey = user?.id ? `dalat_sid_${user.id}` : "dalat_sid_guest";
+  const stored = window.localStorage.getItem(storageKey);
   if (stored) {
-    return stored;
+    return { id: stored, userId: user?.id ?? null };
   }
 
   const generated = window.crypto.randomUUID();
-  window.localStorage.setItem("dalat_sid", generated);
-  return generated;
+  window.localStorage.setItem(storageKey, generated);
+  return { id: generated, userId: user?.id ?? null };
 }
 
 function formatMessage(text: string) {
@@ -86,7 +110,7 @@ export function ChatWidget({ mode = "floating", autoSend = null }: ChatWidgetPro
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [unread, setUnread] = useState(0);
-  const [sessionId] = useState<string>(() => createSessionId());
+  const [session] = useState<{ id: string; userId: string | null }>(() => createSessionId());
   const [historyLoaded, setHistoryLoaded] = useState(false);
   const [bookingOpen, setBookingOpen] = useState(false);
   const [bookingPlaceName, setBookingPlaceName] = useState("");
@@ -107,17 +131,17 @@ export function ChatWidget({ mode = "floating", autoSend = null }: ChatWidgetPro
       void postInitialGreeting();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, sessionId, historyLoaded, messages.length]);
+  }, [mode, session.id, historyLoaded, messages.length]);
 
   useEffect(() => {
     async function loadHistory() {
-      if (!sessionId) {
+      if (!session.id) {
         setHistoryLoaded(true);
         return;
       }
 
       try {
-        const response = await fetch(`/api/chat/history?sid=${encodeURIComponent(sessionId)}`);
+        const response = await fetch(`/api/chat/history?sid=${encodeURIComponent(session.id)}`);
         const data = (await response.json()) as { success?: boolean; history?: ChatHistoryItem[] };
         if (!response.ok || data.success === false || !Array.isArray(data.history) || data.history.length === 0) {
           setHistoryLoaded(true);
@@ -140,12 +164,12 @@ export function ChatWidget({ mode = "floating", autoSend = null }: ChatWidgetPro
 
     void loadHistory();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionId]);
+  }, [session.id]);
 
   const quickChoices = extractQuickChoices(mode);
 
   async function postInitialGreeting() {
-    if (!sessionId) {
+    if (!session.id) {
       return;
     }
 
@@ -156,7 +180,7 @@ export function ChatWidget({ mode = "floating", autoSend = null }: ChatWidgetPro
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           q: "",
-          sid: sessionId,
+          sid: session.id,
           payload: { action: "go_node", value: "intro" },
           loc: null,
         }),
@@ -190,14 +214,14 @@ export function ChatWidget({ mode = "floating", autoSend = null }: ChatWidgetPro
     }
 
     lastAutoSendRef.current = autoSend;
-    if (sessionId) {
+    if (session.id) {
       void sendMessage(autoSend);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoSend, sessionId]);
+  }, [autoSend, session.id]);
 
   async function sendMessage(text: string) {
-    if (!text.trim() || !sessionId) {
+    if (!text.trim() || !session.id) {
       return;
     }
 
@@ -211,7 +235,7 @@ export function ChatWidget({ mode = "floating", autoSend = null }: ChatWidgetPro
       const response = await fetch("/api/ai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ q: text.trim(), sid: sessionId }),
+        body: JSON.stringify({ q: text.trim(), sid: session.id }),
       });
 
       const data = (await response.json()) as AiResponse;
@@ -241,10 +265,27 @@ export function ChatWidget({ mode = "floating", autoSend = null }: ChatWidgetPro
       await fetch("/api/chat/history", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sid: sessionId, sender, message }),
+        body: JSON.stringify({ sid: session.id, sender, message, userId: session.userId }),
       });
     } catch {
       // ignore storage failures
+    }
+  }
+
+  async function resetConversation() {
+    setMessages([]);
+    setChoices([]);
+
+    try {
+      if (session.id) {
+        await fetch(`/api/chat/history?sid=${encodeURIComponent(session.id)}`, { method: "DELETE" });
+      }
+    } catch {
+      // ignore delete failures
+    }
+
+    if (isOpen || mode === "embedded") {
+      await postInitialGreeting();
     }
   }
 
@@ -325,6 +366,16 @@ export function ChatWidget({ mode = "floating", autoSend = null }: ChatWidgetPro
       </div>
 
       <div className="border-t border-pine-500/10 bg-cream p-4">
+        <div className="mb-3 flex justify-end">
+          <button
+            type="button"
+            onClick={() => void resetConversation()}
+            className="rounded-full border border-pine-500/20 px-3 py-1 text-xs font-semibold text-pine-700 transition hover:bg-pine-500/5"
+          >
+            Reset hội thoại
+          </button>
+        </div>
+
         {choices.length > 0 ? (
           <div className="mb-4 flex flex-wrap gap-2">
             {choices.map((choice) => (
