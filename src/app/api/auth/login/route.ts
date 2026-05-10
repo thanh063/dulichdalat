@@ -28,7 +28,9 @@ export async function POST(request: NextRequest) {
   });
 
   if (error) {
-    return NextResponse.json({ success: false, message: error.message }, { status: 400 });
+    // Return application-level error (200) so frontend can display message
+    // without producing a network-level 4xx in the browser console.
+    return NextResponse.json({ success: false, message: error.message });
   }
 
   return NextResponse.json({
