@@ -7,17 +7,23 @@ import places from "@/data/dalat.json";
 type PlaceRecord = {
   slug: string;
   name: string;
-  category: string;
-  rating: number;
-  reviewCount: number;
+  category?: string;
+  rating?: number;
+  reviewCount?: number;
   address: string;
   hours: string;
-  description: string;
+  description?: string;
   tags: string[];
-  image: string;
+  image?: string;
 };
 
 const placeItems = places as PlaceRecord[];
+
+const getCategory = (place: PlaceRecord) => place.category ?? "Điểm đến";
+const getRating = (place: PlaceRecord) => place.rating ?? 0;
+const getReviewCount = (place: PlaceRecord) => place.reviewCount ?? 0;
+const getDescription = (place: PlaceRecord) => place.description ?? "Đang cập nhật thông tin chi tiết cho địa điểm này.";
+const getImage = (place: PlaceRecord) => place.image ?? "/images/dalat3.svg";
 
 const categories = ["Tất cả", "Tham Quan", "Ẩm Thực"];
 
@@ -29,10 +35,11 @@ export default function PlacesPage() {
     const normalizedQuery = query.trim().toLowerCase();
 
     return placeItems.filter((place) => {
-      const matchesCategory = activeCategory === "Tất cả" || place.category === activeCategory;
+      const category = getCategory(place);
+      const matchesCategory = activeCategory === "Tất cả" || category === activeCategory;
       const matchesQuery =
         normalizedQuery.length === 0 ||
-        [place.name, place.description, place.address, ...place.tags].some((value) =>
+        [place.name, getDescription(place), place.address, ...place.tags].some((value) =>
           value.toLowerCase().includes(normalizedQuery),
         );
 
@@ -86,9 +93,9 @@ export default function PlacesPage() {
             key={place.slug}
             className="overflow-hidden rounded-[2rem] border border-pine-500/10 bg-white shadow-[0_18px_45px_rgba(26,47,15,0.08)] transition hover:-translate-y-1 hover:border-pine-500/25 hover:shadow-[0_30px_70px_rgba(26,47,15,0.12)]"
           >
-            <div className="relative aspect-[4/3] bg-cover bg-center" style={{ backgroundImage: `url(${place.image})` }}>
+            <div className="relative aspect-[4/3] bg-cover bg-center" style={{ backgroundImage: `url(${getImage(place)})` }}>
               <span className="absolute left-4 top-4 rounded-full bg-cream/95 px-3 py-1 text-xs font-semibold text-pine-900 backdrop-blur">
-                {place.category}
+                {getCategory(place)}
               </span>
             </div>
             <div className="p-5">
@@ -98,11 +105,11 @@ export default function PlacesPage() {
                   <p className="mt-1 text-sm text-smoke">{place.address}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-bold text-pine-900">⭐ {place.rating.toFixed(1)}</p>
-                  <p className="text-xs text-smoke">{place.reviewCount} đánh giá</p>
+                  <p className="text-lg font-bold text-pine-900">⭐ {getRating(place).toFixed(1)}</p>
+                  <p className="text-xs text-smoke">{getReviewCount(place)} đánh giá</p>
                 </div>
               </div>
-              <p className="mt-4 text-sm leading-7 text-smoke">{place.description}</p>
+              <p className="mt-4 text-sm leading-7 text-smoke">{getDescription(place)}</p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {place.tags.slice(0, 3).map((tag) => (
                   <span key={tag} className="rounded-full bg-pine-500/5 px-3 py-1 text-xs font-semibold text-pine-700">

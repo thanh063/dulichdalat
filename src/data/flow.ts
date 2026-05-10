@@ -1,7 +1,30 @@
-import type { ChatChoice } from "@/lib/chatbot/types";
+import type { FlowNode } from "@/lib/chatbot/types";
 
-export const introChoices: ChatChoice[] = [
-  { label: "Lịch trình 3 ngày 2 đêm", payload: { action: "go_node", value: "itinerary_3d2n" } },
-  { label: "Quán cà phê view đẹp", payload: { action: "go_node", value: "cafe_views" } },
-  { label: "Homestay giá tốt", payload: { action: "go_node", value: "stay_booking" } },
-];
+type FlowData = {
+  start: string;
+  nodes: Record<string, FlowNode>;
+};
+
+export const FLOW: FlowData = {
+  start: "intro",
+  nodes: {
+    intro: {
+      text: "Xin chào 👋 Mình là trợ lý du lịch Đà Lạt. Bạn muốn mình hỗ trợ gì hôm nay?",
+      choices: [
+        { label: "🌸 Địa điểm tham quan", next: "intro" },
+        { label: "☕ Cafe & Ẩm thực", next: "intro" },
+        { label: "🏨 Lưu trú", next: "booking" },
+        { label: "🗓️ Lên lịch trình", next: "intro" },
+        { label: "🛵 Di chuyển", next: "intro" },
+      ],
+    },
+    booking: {
+      text: "Bạn muốn đặt bàn hay đặt phòng?",
+      choices: [
+        { label: "🍽️ Đặt bàn nhà hàng", payload: { action: "open_booking", value: "", type: "table" } },
+        { label: "🏨 Đặt phòng/homestay", payload: { action: "open_booking", value: "", type: "room" } },
+        { label: "⬅ Menu chính", next: "intro" },
+      ],
+    },
+  },
+};

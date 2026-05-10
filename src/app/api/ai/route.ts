@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
-import { handleMessage } from "@/lib/chatbot/handler";
+import { handleMessage } from "@/lib/chatbot/legacy/handler";
 
 const requestSchema = z.object({
   q: z.string().optional().default(""),
@@ -22,12 +22,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: "Thiếu session hoặc dữ liệu đầu vào không hợp lệ." }, { status: 400 });
   }
 
-  const result = await handleMessage({
-    q: parsed.data.q,
-    sid: parsed.data.sid,
-    payload: parsed.data.payload,
-    loc: parsed.data.loc ?? null,
-  });
+  const result = await handleMessage(
+    parsed.data.q,
+    parsed.data.payload ?? null,
+    parsed.data.sid,
+    undefined,
+  );
 
-  return NextResponse.json(result);
+  return NextResponse.json({
+    message: result.response,
+    choices: result.choices,
+  });
 }
