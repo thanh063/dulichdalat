@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useSyncExternalStore } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 
 const navigation = [
   { href: "/", label: "Trang Chủ" },
@@ -16,29 +16,12 @@ type HeaderUser = {
   role: string;
 };
 
-function readStoredUser(): HeaderUser | null {
+function readStoredUserSnapshot(): string {
   if (typeof window === "undefined") {
-    return null;
+    return "";
   }
 
-  try {
-    const stored = window.localStorage.getItem("dalat_user");
-    if (!stored) {
-      return null;
-    }
-
-    const parsed = JSON.parse(stored) as { name?: string; role?: string } | null;
-    if (!parsed?.name) {
-      return null;
-    }
-
-    return {
-      name: parsed.name,
-      role: parsed.role || "user",
-    };
-  } catch {
-    return null;
-  }
+  return window.localStorage.getItem("dalat_user") ?? "";
 }
 
 function subscribeToUserChanges(callback: () => void) {
@@ -56,7 +39,26 @@ function subscribeToUserChanges(callback: () => void) {
 export function Header() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const user = useSyncExternalStore(subscribeToUserChanges, readStoredUser, () => null);
+  const userSnapshot = useSyncExternalStore(subscribeToUserChanges, readStoredUserSnapshot, () => "");
+  const user = useMemo<HeaderUser | null>(() => {
+    if (!userSnapshot) {
+      return null;
+    }
+
+    try {
+      const parsed = JSON.parse(userSnapshot) as { name?: string; role?: string } | null;
+      if (!parsed?.name) {
+        return null;
+      }
+
+      return {
+        name: parsed.name,
+        role: parsed.role || "user",
+      };
+    } catch {
+      return null;
+    }
+  }, [userSnapshot]);
 
   function handleLogout() {
     window.localStorage.removeItem("dalat_user");
