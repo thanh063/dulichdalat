@@ -23,7 +23,7 @@ const getCategory = (place: PlaceRecord) => place.category ?? "Điểm đến";
 const getRating = (place: PlaceRecord) => place.rating ?? 0;
 const getReviewCount = (place: PlaceRecord) => place.reviewCount ?? 0;
 const getDescription = (place: PlaceRecord) => place.description ?? "Đang cập nhật thông tin chi tiết cho địa điểm này.";
-const getImage = (place: PlaceRecord) => place.image ?? "/images/dalat3.svg";
+const getImage = (place: PlaceRecord) => place.image ?? "/images/dalat3.png";
 
 const categories = ["Tất cả", "Tham Quan", "Ẩm Thực"];
 
@@ -57,7 +57,7 @@ export default function PlacesPage() {
             Tìm điểm tham quan, cà phê, ẩm thực và lưu trú theo nhu cầu thực tế của bạn. Bộ dữ liệu này kết hợp từ danh sách địa điểm và trải nghiệm địa phương.
           </p>
         </div>
-        <div className="overflow-hidden rounded-[2rem] bg-[url('/images/dalat3.svg')] bg-cover bg-center min-h-64" />
+        <div className="overflow-hidden rounded-[2rem] bg-[url('/images/dalat3.png')] bg-cover bg-center min-h-64" />
       </section>
 
       <section className="sticky top-20 z-20 mt-8 rounded-[1.75rem] border border-pine-500/10 bg-cream/90 p-4 backdrop-blur-xl">

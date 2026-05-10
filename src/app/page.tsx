@@ -6,7 +6,7 @@ export default function Home() {
       {/* SECTION 1 — HERO */}
       <section className="relative isolate overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(26,47,15,0.62),rgba(26,47,15,0.38)_50%,rgba(26,47,15,0.72))]" />
-        <div className="absolute inset-0 bg-[url('/images/dalat1.svg')] bg-cover bg-center opacity-25" />
+        <div className="absolute inset-0 bg-[url('/images/dalat1.png')] bg-cover bg-center opacity-25" />
         <div className="mx-auto flex min-h-[92vh] w-full max-w-7xl items-center px-6 py-24 sm:px-10 lg:px-12">
           <div className="relative z-10 max-w-3xl text-cream">
             <p className="mb-6 inline-flex items-center gap-2 rounded-full border border-gold/40 bg-gold/15 px-4 py-2 text-sm font-semibold tracking-[0.35em] text-gold uppercase backdrop-blur-sm animate-fade-in-up">
@@ -61,7 +61,7 @@ export default function Home() {
       {/* SECTION 3 — GIỚI THIỆU 2 CỘT */}
       <section className="mx-auto grid max-w-7xl gap-8 px-6 py-16 sm:px-10 lg:grid-cols-2 lg:px-12 lg:py-24">
         <div className="overflow-hidden rounded-[2rem] border border-pine-500/10 shadow-[0_20px_60px_rgba(26,47,15,0.08)]">
-          <div className="aspect-square bg-[url('/images/dalat2.svg')] bg-cover bg-center" />
+          <div className="aspect-square bg-[url('/images/dalat2.png')] bg-cover bg-center" />
         </div>
         <div className="flex flex-col justify-center space-y-6">
           <p className="text-sm font-semibold uppercase tracking-[0.3em] text-pine-700">Về Đà Lạt</p>

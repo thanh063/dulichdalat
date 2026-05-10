@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     url: "https://dalat-travel.vercel.app",
     images: [
       {
-        url: "/images/dalat1.svg",
+        url: "/images/dalat1.png",
         width: 1200,
         height: 630,
         alt: "Đà Lạt - Thành phố ngàn hoa",

@@ -42,7 +42,7 @@ export default function LoginPage() {
 
   return (
     <div className="mx-auto grid min-h-[calc(100vh-7rem)] max-w-7xl gap-8 px-6 py-10 sm:px-10 lg:grid-cols-2 lg:px-12">
-      <div className="hidden overflow-hidden rounded-[2rem] bg-[url('/images/dalat4.svg')] bg-cover bg-center lg:block" />
+      <div className="hidden overflow-hidden rounded-[2rem] bg-[url('/images/dalat4.png')] bg-cover bg-center lg:block" />
       <form onSubmit={handleSubmit} className="rounded-[2rem] border border-pine-500/10 bg-white p-8 shadow-[0_20px_60px_rgba(26,47,15,0.08)]">
         <p className="text-sm font-semibold uppercase tracking-[0.3em] text-pine-700">Đăng nhập</p>
         <h1 className="mt-4 font-display text-5xl text-pine-900">Chào mừng quay lại</h1>

@@ -24,7 +24,7 @@ function getDescription(place: PlaceRecord) {
 }
 
 function getImage(place: PlaceRecord) {
-  return place.image ?? "/images/dalat1.svg";
+  return place.image ?? "/images/dalat1.png";
 }
 
 function getCategory(place: PlaceRecord) {
