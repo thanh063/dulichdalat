@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import { registerUser } from "@/lib/chatbot/services/authService";
 
 const requestSchema = z.object({
   name: z.string().min(2),
@@ -21,6 +22,17 @@ export async function POST(request: NextRequest) {
 
   if (!supabaseUrl || !supabaseAnonKey) {
     return NextResponse.json({ success: true, message: "Đăng ký mô phỏng thành công (chưa cấu hình Supabase)." });
+  }
+
+  if (process.env.NODE_ENV !== "production" || process.env.SUPABASE_DISABLE_EMAIL_CONFIRMATION === "true") {
+    const result = await registerUser({
+      name: parsed.data.name,
+      email: parsed.data.email,
+      phone: parsed.data.phone,
+      password: parsed.data.password,
+    });
+
+    return NextResponse.json(result, { status: result.success ? 200 : 400 });
   }
 
   const supabase = createClient(supabaseUrl, supabaseAnonKey);
