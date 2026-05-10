@@ -46,9 +46,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi" className={`${jost.variable} h-full antialiased`}>
-      <body className="min-h-full bg-cream text-charcoal">
+      <body className="flex min-h-full flex-col bg-cream text-charcoal">
         <Header />
-        <main className="flex-1">{children}</main>
+        <main className="relative z-0 flex-1 overflow-y-auto">{children}</main>
         <Footer />
         <ChatWidget />
       </body>
