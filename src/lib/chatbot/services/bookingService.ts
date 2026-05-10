@@ -9,7 +9,7 @@ export interface BookingRequest {
   time?: string | null;
   guests: number;
   type: 'table' | 'room';
-  userId?: number | null;
+  userId?: string | null;
 }
 
 export async function createBooking(booking: BookingRequest): Promise<boolean> {
@@ -18,7 +18,7 @@ export async function createBooking(booking: BookingRequest): Promise<boolean> {
 
   try {
     type BookingInsert = {
-      user_id: number;
+      user_id: string | null;
       place_name: string;
       type: 'table' | 'room';
       customer_name: string;
@@ -31,7 +31,7 @@ export async function createBooking(booking: BookingRequest): Promise<boolean> {
     };
 
     const payload: BookingInsert = {
-      user_id: booking.userId || 1,
+      user_id: booking.userId || null,
       place_name: booking.placeName,
       type: booking.type,
       customer_name: booking.customerName,
