@@ -48,7 +48,7 @@ export default function RegisterPage() {
 
       const data = (await response.json()) as { success: boolean; message: string };
       if (!response.ok || !data.success) {
-        throw new Error(data.message);
+        throw new Error(formatRegisterError(data.message));
       }
 
       router.push("/login");
@@ -91,6 +91,20 @@ export default function RegisterPage() {
       </form>
     </div>
   );
+}
+
+function formatRegisterError(message: string) {
+  const normalizedMessage = message.toLowerCase();
+
+  if (normalizedMessage.includes("email rate limit exceeded")) {
+    return "Email xác nhận đang bị giới hạn. Vui lòng thử lại sau vài phút.";
+  }
+
+  if (normalizedMessage.includes("already registered")) {
+    return "Email này đã được đăng ký. Bạn có thể đăng nhập thay vì tạo tài khoản mới.";
+  }
+
+  return message;
 }
 
 function Field({ label, type = "text", value, onChange }: { label: string; type?: string; value: string; onChange: (value: string) => void }) {
