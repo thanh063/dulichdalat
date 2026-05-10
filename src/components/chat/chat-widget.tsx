@@ -287,7 +287,7 @@ export function ChatWidget({ mode = "floating", autoSend = null }: ChatWidgetPro
         ) : null}
       </div>
 
-      <div ref={viewportRef} className="flex-1 space-y-4 overflow-y-auto bg-stone-50 p-4">
+      <div ref={viewportRef} className="chat-scrollbar flex-1 space-y-4 overflow-y-scroll bg-stone-50 p-4">
         {messages.length === 0 ? (
           <div className="rounded-3xl border border-pine-500/10 bg-white p-4 text-sm text-smoke">
             {greeting}

@@ -80,6 +80,25 @@ body {
   border: 2px solid var(--mist-100);
 }
 
+.chat-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--pine-700) var(--mist-100);
+}
+
+.chat-scrollbar::-webkit-scrollbar {
+  width: 10px;
+}
+
+.chat-scrollbar::-webkit-scrollbar-track {
+  background: var(--mist-100);
+}
+
+.chat-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--pine-700);
+  border-radius: 9999px;
+  border: 2px solid var(--mist-100);
+}
+
 @keyframes fadeInUp {
   from {
     opacity: 0;

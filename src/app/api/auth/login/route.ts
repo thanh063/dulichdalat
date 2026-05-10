@@ -60,6 +60,7 @@ export async function POST(request: NextRequest) {
     success: true,
     message: "Đăng nhập thành công.",
     user: data.user,
+    profile: await getUserProfile(data.user.id, data.user.user_metadata?.name || "Khách", data.user.email || parsed.data.email),
     session: data.session,
   });
 }
@@ -89,4 +90,39 @@ async function confirmUserEmail(email: string) {
   });
 
   return !updateResult.error;
+}
+
+async function getUserProfile(userId: string, fallbackName: string, email: string) {
+  const supabase = getSupabaseAdminClient();
+  const fallbackProfile = {
+    id: userId,
+    name: fallbackName,
+    email,
+    phone: "",
+    address: "",
+    role: "user",
+  };
+
+  if (!supabase) {
+    return fallbackProfile;
+  }
+
+  const { data } = await supabase
+    .from("profiles")
+    .select("id, name, email, phone, address, role")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (!data) {
+    return fallbackProfile;
+  }
+
+  return {
+    id: data.id,
+    name: data.name || fallbackName,
+    email: data.email || email,
+    phone: data.phone || "",
+    address: data.address || "",
+    role: data.role || "user",
+  };
 }

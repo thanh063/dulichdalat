@@ -32,6 +32,13 @@ export default function LoginPage() {
         throw new Error(data.message);
       }
 
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(
+          "dalat_user",
+          JSON.stringify((data as { profile?: { id: string; name: string; email: string; phone: string; address: string; role: string } }).profile ?? null),
+        );
+      }
+
       router.push("/");
     } catch (submissionError) {
       setError(submissionError instanceof Error ? submissionError.message : "Đăng nhập thất bại.");

@@ -12,6 +12,30 @@ const navigation = [
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const [user] = useState<{ name: string; role: string } | null>(() => {
+    if (typeof window === "undefined") {
+      return null;
+    }
+
+    try {
+      const stored = window.localStorage.getItem("dalat_user");
+      if (!stored) {
+        return null;
+      }
+
+      const parsed = JSON.parse(stored) as { name?: string; role?: string } | null;
+      if (!parsed?.name) {
+        return null;
+      }
+
+      return {
+        name: parsed.name,
+        role: parsed.role || "user",
+      };
+    } catch {
+      return null;
+    }
+  });
 
   return (
     <header className="sticky top-0 z-50 border-b border-pine-500/10 bg-cream/85 backdrop-blur-xl">
@@ -41,12 +65,19 @@ export function Header() {
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <Link
-            href="/login"
-            className="rounded-full border border-pine-500/20 px-5 py-2.5 text-sm font-semibold text-pine-900 transition hover:border-pine-500/40 hover:bg-pine-500/5"
-          >
-            Đăng nhập
-          </Link>
+          {user ? (
+            <div className="rounded-full border border-pine-500/20 bg-white px-4 py-2 text-left shadow-sm">
+              <p className="text-sm font-semibold text-pine-900">{user.name}</p>
+              <p className="text-[11px] uppercase tracking-[0.22em] text-smoke">{user.role}</p>
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              className="rounded-full border border-pine-500/20 px-5 py-2.5 text-sm font-semibold text-pine-900 transition hover:border-pine-500/40 hover:bg-pine-500/5"
+            >
+              Đăng nhập
+            </Link>
+          )}
           <Link
             href="/chat"
             className="rounded-full bg-pine-700 px-5 py-2.5 text-sm font-semibold text-cream transition hover:bg-pine-900"
@@ -85,13 +116,19 @@ export function Header() {
               </Link>
             ))}
             <div className="mt-2 flex gap-3">
-              <Link
-                href="/login"
-                className="flex-1 rounded-full border border-pine-500/20 px-5 py-3 text-center text-sm font-semibold text-pine-900"
-                onClick={() => setIsOpen(false)}
-              >
-                Đăng nhập
-              </Link>
+              {user ? (
+                <div className="flex-1 rounded-full border border-pine-500/20 bg-white px-5 py-3 text-center text-sm font-semibold text-pine-900">
+                  {user.name} · {user.role}
+                </div>
+              ) : (
+                <Link
+                  href="/login"
+                  className="flex-1 rounded-full border border-pine-500/20 px-5 py-3 text-center text-sm font-semibold text-pine-900"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Đăng nhập
+                </Link>
+              )}
               <Link
                 href="/chat"
                 className="flex-1 rounded-full bg-pine-700 px-5 py-3 text-center text-sm font-semibold text-cream"
