@@ -17,7 +17,7 @@ export async function updateSession(request: NextRequest) {
           response = NextResponse.next({ request });
           response.cookies.set({ name, value, ...options });
         },
-        remove(name, _options) {
+        remove(name) {
           request.cookies.delete(name);
           response = NextResponse.next({ request });
           response.cookies.delete(name);

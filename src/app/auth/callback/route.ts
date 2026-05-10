@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
         set(name, value, options) {
           response.cookies.set({ name, value, ...options });
         },
-        remove(name, _options) {
+        remove(name) {
           response.cookies.delete(name);
         },
       },
