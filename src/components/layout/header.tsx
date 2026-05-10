@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 const navigation = [
@@ -11,8 +12,9 @@ const navigation = [
 ];
 
 export function Header() {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [user] = useState<{ name: string; role: string } | null>(() => {
+  const [user, setUser] = useState<{ name: string; role: string } | null>(() => {
     if (typeof window === "undefined") {
       return null;
     }
@@ -36,6 +38,13 @@ export function Header() {
       return null;
     }
   });
+
+  function handleLogout() {
+    window.localStorage.removeItem("dalat_user");
+    setUser(null);
+    setIsOpen(false);
+    router.push("/login");
+  }
 
   return (
     <header className="sticky top-0 z-50 border-b border-pine-500/10 bg-cream/85 backdrop-blur-xl">
@@ -66,9 +75,18 @@ export function Header() {
 
         <div className="hidden items-center gap-3 lg:flex">
           {user ? (
-            <div className="rounded-full border border-pine-500/20 bg-white px-4 py-2 text-left shadow-sm">
-              <p className="text-sm font-semibold text-pine-900">{user.name}</p>
-              <p className="text-[11px] uppercase tracking-[0.22em] text-smoke">{user.role}</p>
+            <div className="flex items-center gap-3 rounded-full border border-pine-500/20 bg-white px-4 py-2 text-left shadow-sm">
+              <div>
+                <p className="text-sm font-semibold text-pine-900">{user.name}</p>
+                <p className="text-[11px] uppercase tracking-[0.22em] text-smoke">{user.role}</p>
+              </div>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="rounded-full border border-pine-500/20 px-3 py-1 text-xs font-semibold text-pine-700 transition hover:bg-pine-500/5"
+              >
+                Đăng xuất
+              </button>
             </div>
           ) : (
             <Link
@@ -117,8 +135,17 @@ export function Header() {
             ))}
             <div className="mt-2 flex gap-3">
               {user ? (
-                <div className="flex-1 rounded-full border border-pine-500/20 bg-white px-5 py-3 text-center text-sm font-semibold text-pine-900">
-                  {user.name} · {user.role}
+                <div className="flex flex-1 items-center justify-between rounded-full border border-pine-500/20 bg-white px-5 py-3 text-sm font-semibold text-pine-900">
+                  <span>
+                    {user.name} · {user.role}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="rounded-full border border-pine-500/20 px-3 py-1 text-xs font-semibold text-pine-700"
+                  >
+                    Đăng xuất
+                  </button>
                 </div>
               ) : (
                 <Link

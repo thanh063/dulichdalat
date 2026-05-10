@@ -270,7 +270,7 @@ export function ChatWidget({ mode = "floating", autoSend = null }: ChatWidgetPro
   }
 
   const panel = (
-    <div className="flex h-full min-h-128 flex-col overflow-hidden rounded-4xl border border-pine-500/10 bg-cream shadow-[0_24px_80px_rgba(26,47,15,0.18)]">
+    <div className="flex h-full max-h-[70vh] min-h-128 flex-col overflow-hidden rounded-4xl border border-pine-500/10 bg-cream shadow-[0_24px_80px_rgba(26,47,15,0.18)]">
       <div className="flex items-center justify-between bg-pine-900 px-5 py-4 text-cream">
         <div>
           <p className="text-sm uppercase tracking-[0.3em] text-cream/70">Trợ Lý Du Lịch Đà Lạt</p>
@@ -287,7 +287,7 @@ export function ChatWidget({ mode = "floating", autoSend = null }: ChatWidgetPro
         ) : null}
       </div>
 
-      <div ref={viewportRef} className="chat-scrollbar flex-1 space-y-4 overflow-y-scroll bg-stone-50 p-4">
+      <div ref={viewportRef} className="chat-scrollbar min-h-0 flex-1 space-y-4 overflow-y-scroll bg-stone-50 p-4">
         {messages.length === 0 ? (
           <div className="rounded-3xl border border-pine-500/10 bg-white p-4 text-sm text-smoke">
             {greeting}
