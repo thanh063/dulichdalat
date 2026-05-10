@@ -36,7 +36,9 @@ export async function POST(request: NextRequest) {
   });
 
   if (error) {
-    return NextResponse.json({ success: false, message: error.message }, { status: 400 });
+    // Keep auth errors as 200 responses so the client can display the message
+    // without surfacing a network-level 4xx in the browser console.
+    return NextResponse.json({ success: false, message: error.message });
   }
 
   return NextResponse.json({ success: true, message: "Đăng ký thành công. Vui lòng kiểm tra email xác nhận." });
