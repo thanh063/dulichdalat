@@ -311,7 +311,7 @@ export function ChatWidget({ mode = "floating", autoSend = null }: ChatWidgetPro
   }
 
   const panel = (
-    <div className="flex h-full max-h-[70vh] min-h-128 flex-col overflow-hidden rounded-4xl border border-pine-500/10 bg-cream shadow-[0_24px_80px_rgba(26,47,15,0.18)]">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-cream shadow-[0_24px_80px_rgba(26,47,15,0.18)]">
       <div className="flex items-center justify-between bg-pine-900 px-5 py-4 text-cream">
         <div>
           <p className="text-sm uppercase tracking-[0.3em] text-cream/70">Trợ Lý Du Lịch Đà Lạt</p>
@@ -323,7 +323,7 @@ export function ChatWidget({ mode = "floating", autoSend = null }: ChatWidgetPro
             onClick={() => setIsOpen(false)}
             className="rounded-full border border-cream/20 px-3 py-1 text-sm"
           >
-            Thu nhỏ
+            Đóng
           </button>
         ) : null}
       </div>
@@ -428,7 +428,7 @@ export function ChatWidget({ mode = "floating", autoSend = null }: ChatWidgetPro
           setIsOpen(true);
           setUnread(0);
         }}
-        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-pine-700 text-2xl text-cream shadow-2xl shadow-pine-900/30 transition hover:bg-pine-900"
+        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#2D5016] text-2xl text-cream shadow-2xl shadow-pine-900/30 transition hover:bg-[#234111]"
       >
         🌿
         {unread > 0 ? (
@@ -438,11 +438,24 @@ export function ChatWidget({ mode = "floating", autoSend = null }: ChatWidgetPro
         ) : null}
       </button>
 
-      {isOpen ? (
-        <div className="fixed bottom-24 right-6 z-50 w-[24rem] max-w-[calc(100vw-1.5rem)]">
+      <div
+        className={`fixed inset-0 z-50 transition-opacity duration-300 ${isOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}
+        aria-hidden={!isOpen}
+      >
+        <button
+          type="button"
+          aria-label="Đóng trợ lý"
+          className="absolute inset-0 cursor-default bg-black/20 backdrop-blur-[1px]"
+          onClick={() => setIsOpen(false)}
+          tabIndex={isOpen ? 0 : -1}
+        />
+
+        <aside
+          className={`absolute right-0 top-0 flex h-dvh w-[24rem] max-w-[calc(100vw-1.5rem)] transform border-l border-pine-500/10 transition-transform duration-300 ease-out ${isOpen ? "translate-x-0" : "translate-x-full"}`}
+        >
           {panel}
-        </div>
-      ) : null}
+        </aside>
+      </div>
 
       <BookingModal
         open={bookingOpen}

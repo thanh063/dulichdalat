@@ -135,12 +135,6 @@ export function Header() {
               Đăng nhập
             </Link>
           )}
-          <Link
-            href="/chat"
-            className="rounded-full bg-pine-700 px-5 py-2.5 text-sm font-semibold text-cream transition hover:bg-pine-900"
-          >
-            Chat AI 🌿
-          </Link>
         </div>
 
         <button
@@ -195,13 +189,6 @@ export function Header() {
                   Đăng nhập
                 </Link>
               )}
-              <Link
-                href="/chat"
-                className="flex-1 rounded-full bg-pine-700 px-5 py-3 text-center text-sm font-semibold text-cream"
-                onClick={() => setIsOpen(false)}
-              >
-                Chat AI
-              </Link>
             </div>
           </nav>
         </div>
