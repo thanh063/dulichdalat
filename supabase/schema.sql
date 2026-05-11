@@ -252,9 +252,57 @@ using (
   )
 );
 
+-- Itineraries table
+create table if not exists public.itineraries (
+  id bigserial primary key,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  title text not null,
+  start_date date not null,
+  duration_days integer not null check (duration_days > 0),
+  itinerary_data jsonb not null,
+  share_token text unique,
+  is_public boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+-- RLS policies for itineraries
+alter table public.itineraries enable row level security;
+
+create policy itineraries_own
+on public.itineraries
+for select
+using (
+  auth.uid() = user_id
+  or is_public = true
+);
+
+create policy itineraries_create
+on public.itineraries
+for insert
+with check (
+  auth.uid() = user_id
+);
+
+create policy itineraries_update_own
+on public.itineraries
+for update
+using (
+  auth.uid() = user_id
+);
+
+create policy itineraries_delete_own
+on public.itineraries
+for delete
+using (
+  auth.uid() = user_id
+);
+
 -- Helpful indexes for session-based chat lookup and foreign keys
 create index if not exists idx_profiles_role on public.profiles(role);
 create index if not exists idx_chat_history_session_id on public.chat_history(session_id);
 create index if not exists idx_chat_history_user_id on public.chat_history(user_id);
 create index if not exists idx_bookings_user_id on public.bookings(user_id);
 create index if not exists idx_admin_notifications_booking_id on public.admin_notifications(booking_id);
+create index if not exists idx_itineraries_user_id on public.itineraries(user_id);
+create index if not exists idx_itineraries_share_token on public.itineraries(share_token);

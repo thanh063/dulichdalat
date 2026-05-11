@@ -7,7 +7,7 @@ import { useMemo, useState, useSyncExternalStore } from "react";
 const navigation = [
   { href: "/", label: "Trang Chủ" },
   { href: "/places", label: "Địa Điểm" },
-  { href: "/itinerary", label: "Lịch Trình" },
+  { href: "/dat-tour", label: "Đặt Tour" },
   { href: "/chat", label: "Chat" },
 ];
 
