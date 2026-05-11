@@ -31,26 +31,6 @@ export default function DatTourPage() {
   const [shareLink, setShareLink] = useState("");
   const [draggedPlace, setDraggedPlace] = useState<{ place: string; dayIndex: number } | null>(null);
 
-  // Load user info
-  useEffect(() => {
-    const stored = window.localStorage.getItem("dalat_user");
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        setUser(parsed);
-      } catch {
-        // ignore
-      }
-    }
-  }, []);
-
-  // Generate initial itinerary when step changes to 2
-  useEffect(() => {
-    if (currentStep === 2 && itinerary.days.length === 0) {
-      void generateItinerary();
-    }
-  }, [currentStep, generateItinerary, itinerary.days.length]);
-
   const suggestedPlaces = useMemo(
     () => [
       "Thác Datanla",
@@ -72,43 +52,67 @@ export default function DatTourPage() {
     [],
   );
 
-  const generateItinerary = useCallback(async () => {
-    setItinerary((prev) => ({ ...prev, loading: true, error: undefined }));
-    try {
-      const response = await fetch("/api/itineraries/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          startDate: itinerary.startDate,
-          durationDays: itinerary.durationDays,
-        }),
-      });
+  const generateItinerary = useCallback(
+    async (startDate: string, durationDays: number) => {
+      setItinerary((prev) => ({ ...prev, loading: true, error: undefined }));
+      try {
+        const response = await fetch("/api/itineraries/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            startDate,
+            durationDays,
+          }),
+        });
 
-      if (!response.ok) {
-        throw new Error("Không thể tạo lịch trình");
+        if (!response.ok) {
+          throw new Error("Không thể tạo lịch trình");
+        }
+
+        const data = (await response.json()) as { days?: ItineraryDay[] };
+        const days = data.days || Array.from({ length: durationDays }, (_, i) => ({
+          date: new Date(new Date(startDate).getTime() + i * 24 * 60 * 60 * 1000)
+            .toISOString()
+            .split("T")[0],
+          places: suggestedPlaces.slice(i * 3, i * 3 + 3),
+        }));
+
+        setItinerary((prev) => ({
+          ...prev,
+          days,
+          loading: false,
+        }));
+      } catch (err) {
+        setItinerary((prev) => ({
+          ...prev,
+          loading: false,
+          error: err instanceof Error ? err.message : "Lỗi không xác định",
+        }));
       }
+    },
+    [suggestedPlaces],
+  );
 
-      const data = (await response.json()) as { days?: ItineraryDay[] };
-      const days = data.days || Array.from({ length: itinerary.durationDays }, (_, i) => ({
-        date: new Date(new Date(itinerary.startDate).getTime() + i * 24 * 60 * 60 * 1000)
-          .toISOString()
-          .split("T")[0],
-        places: suggestedPlaces.slice(i * 3, i * 3 + 3),
-      }));
-
-      setItinerary((prev) => ({
-        ...prev,
-        days,
-        loading: false,
-      }));
-    } catch (err) {
-      setItinerary((prev) => ({
-        ...prev,
-        loading: false,
-        error: err instanceof Error ? err.message : "Lỗi không xác định",
-      }));
+  // Load user info
+  useEffect(() => {
+    const stored = window.localStorage.getItem("dalat_user");
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        setUser(parsed);
+      } catch {
+        // ignore
+      }
     }
-  }, [itinerary.startDate, itinerary.durationDays, suggestedPlaces]);
+  }, []);
+
+  // Generate initial itinerary when step changes to 2
+  useEffect(() => {
+    if (currentStep === 2 && itinerary.days.length === 0) {
+      void generateItinerary(itinerary.startDate, itinerary.durationDays);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStep]);
 
   async function saveItinerary() {
     if (!user) {
@@ -395,7 +399,7 @@ export default function DatTourPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => generateItinerary()}
+                  onClick={() => generateItinerary(itinerary.startDate, itinerary.durationDays)}
                   className="rounded-full border-2 border-pine-700 px-6 py-3 text-sm font-semibold text-pine-700 transition hover:bg-pine-700/10"
                 >
                   ↻ Tạo Lại

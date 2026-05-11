@@ -11,11 +11,32 @@ export async function POST(req: NextRequest) {
     const { startDate = new Date().toISOString().split("T")[0], durationDays = 3 } = body;
 
     const geminiKey = process.env.GEMINI_API_KEY;
+    
+    // Fallback data if no API key configured
     if (!geminiKey) {
-      return NextResponse.json(
-        { success: false, message: "GEMINI_API_KEY không được cấu hình" },
-        { status: 500 },
-      );
+      const suggestedPlaces = [
+        "Thác Datanla",
+        "Đồi Thông Hồ",
+        "Nhà thờ Con Gà",
+        "Hồ Xuân Hương",
+        "Vườn hoa Thành phố",
+        "Ga Đà Lạt",
+        "Phố cổ Lâm Đồng",
+        "Thiền viện Trúc Lâm",
+        "Thác Liên Khương",
+        "Langbiang Palace",
+        "Vườn Đơi",
+        "Chợ Đà Lạt",
+      ];
+
+      const days = Array.from({ length: durationDays }, (_, i) => ({
+        date: new Date(new Date(startDate).getTime() + i * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split("T")[0],
+        places: suggestedPlaces.slice(i * 3, i * 3 + 3),
+      }));
+
+      return NextResponse.json({ success: true, days });
     }
 
     const client = new GoogleGenerativeAI(geminiKey);
