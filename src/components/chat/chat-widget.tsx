@@ -428,18 +428,18 @@ export function ChatWidget({ mode = "floating", autoSend = null }: ChatWidgetPro
           setIsOpen(true);
           setUnread(0);
         }}
-        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#2D5016] text-2xl text-cream shadow-2xl shadow-pine-900/30 transition hover:bg-[#234111]"
+        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#2D5016] text-2xl text-cream shadow-2xl shadow-pine-900/30 transition-all duration-300 hover:scale-110 hover:bg-[#234111] active:scale-95"
       >
         🌿
         {unread > 0 ? (
-          <span className="absolute -right-1 -top-1 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[11px] font-bold text-white">
+          <span className="absolute -right-1 -top-1 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[11px] font-bold text-white animate-pulse">
             {unread}
           </span>
         ) : null}
       </button>
 
       <div
-        className={`fixed inset-0 z-50 transition-opacity duration-300 ${isOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}
+        className={`fixed inset-0 z-50 transition-opacity duration-300 ease-out ${isOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}
         aria-hidden={!isOpen}
       >
         <button
@@ -451,7 +451,10 @@ export function ChatWidget({ mode = "floating", autoSend = null }: ChatWidgetPro
         />
 
         <aside
-          className={`absolute right-0 top-0 flex h-dvh w-[24rem] max-w-[calc(100vw-1.5rem)] transform border-l border-pine-500/10 transition-transform duration-300 ease-out ${isOpen ? "translate-x-0" : "translate-x-full"}`}
+          className={`absolute right-0 top-0 flex h-dvh w-[24rem] max-w-[calc(100vw-1.5rem)] transform border-l border-pine-500/10 ${isOpen ? "drawer-enter" : "drawer-exit"}`}
+          style={{
+            willChange: isOpen ? "transform" : "auto",
+          }}
         >
           {panel}
         </aside>

@@ -133,6 +133,30 @@ body {
   }
 }
 
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutToRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
 .animate-fade-in-up {
   animation: fadeInUp 0.6s ease both;
 }
@@ -147,6 +171,15 @@ body {
 
 .delay-100 {
   animation-delay: 0.1s;
+}
+
+/* Drawer animations */
+.drawer-enter {
+  animation: slideInFromRight 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.drawer-exit {
+  animation: slideOutToRight 0.3s cubic-bezier(0.2, 0.88, 0.35, 1.07) both;
 }
 
 .delay-200 {
