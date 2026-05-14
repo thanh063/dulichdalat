@@ -106,6 +106,15 @@ after insert on auth.users
 for each row
 execute function public.handle_new_user();
 
+-- Helper: check if current user is admin (reads jwt.claims.role)
+create or replace function public.is_admin()
+returns boolean
+language sql
+security definer
+as $$
+  (current_setting('jwt.claims', true)::json ->> 'role') = 'admin';
+$$;
+
 -- Enable RLS
 alter table public.profiles enable row level security;
 alter table public.chat_history enable row level security;
@@ -126,27 +135,20 @@ drop policy if exists admin_notifications_select_admin on public.admin_notificat
 drop policy if exists admin_notifications_update_admin on public.admin_notifications;
 
 -- Profiles policies
+drop policy if exists profiles_select on public.profiles;
 create policy profiles_select
 on public.profiles
 for select
-using (auth.uid() = id or exists (
-  select 1
-  from public.profiles p
-  where p.id = auth.uid()
-    and p.role = 'admin'
-));
+using (auth.uid() = id or public.is_admin());
 
+drop policy if exists profiles_update on public.profiles;
 create policy profiles_update
 on public.profiles
 for update
-using (auth.uid() = id or exists (
-  select 1
-  from public.profiles p
-  where p.id = auth.uid()
-    and p.role = 'admin'
-));
+using (auth.uid() = id or public.is_admin());
 
 -- If you ever create profiles from client-side signup flows, keep this.
+drop policy if exists profiles_insert_own on public.profiles;
 create policy profiles_insert_own
 on public.profiles
 for insert
@@ -154,103 +156,72 @@ with check (auth.uid() = id);
 
 -- Chat history policies
 -- The app currently writes chat history via server-side admin client, so RLS is mostly for future client-side auth.
+drop policy if exists chat_select_own on public.chat_history;
 create policy chat_select_own
 on public.chat_history
 for select
 using (auth.uid() = user_id or user_id is null);
 
+drop policy if exists chat_insert_session on public.chat_history;
 create policy chat_insert_session
 on public.chat_history
 for insert
 with check (
   user_id is null
   or auth.uid() = user_id
-  or exists (
-    select 1
-    from public.profiles p
-    where p.id = auth.uid()
-      and p.role = 'admin'
-  )
+  or public.is_admin()
 );
 
+drop policy if exists chat_delete_own on public.chat_history;
 create policy chat_delete_own
 on public.chat_history
 for delete
 using (
   auth.uid() = user_id
-  or exists (
-    select 1
-    from public.profiles p
-    where p.id = auth.uid()
-      and p.role = 'admin'
-  )
+  or public.is_admin()
 );
 
 -- Bookings policies
+drop policy if exists bookings_insert on public.bookings;
 create policy bookings_insert
 on public.bookings
 for insert
 with check (
   user_id is null
   or auth.uid() = user_id
-  or exists (
-    select 1
-    from public.profiles p
-    where p.id = auth.uid()
-      and p.role = 'admin'
-  )
+  or public.is_admin()
 );
 
+drop policy if exists bookings_own on public.bookings;
 create policy bookings_own
 on public.bookings
 for select
 using (
   auth.uid() = user_id
-  or exists (
-    select 1
-    from public.profiles p
-    where p.id = auth.uid()
-      and p.role = 'admin'
-  )
+  or public.is_admin()
 );
 
+drop policy if exists bookings_update_own on public.bookings;
 create policy bookings_update_own
 on public.bookings
 for update
 using (
   auth.uid() = user_id
-  or exists (
-    select 1
-    from public.profiles p
-    where p.id = auth.uid()
-      and p.role = 'admin'
-  )
+  or public.is_admin()
 );
 
 -- Admin notifications policies
+drop policy if exists admin_notifications_select_admin on public.admin_notifications;
 create policy admin_notifications_select_admin
 on public.admin_notifications
 for select
-using (
-  exists (
-    select 1
-    from public.profiles p
-    where p.id = auth.uid()
-      and p.role = 'admin'
-  )
-);
+using (public.is_admin());
 
+drop policy if exists admin_notifications_update_admin on public.admin_notifications;
 create policy admin_notifications_update_admin
 on public.admin_notifications
 for update
-using (
-  exists (
-    select 1
-    from public.profiles p
-    where p.id = auth.uid()
-      and p.role = 'admin'
-  )
-);
+using (public.is_admin());
 
 -- Itineraries table
 create table if not exists public.itineraries (
@@ -282,37 +253,31 @@ using (
   or is_public = true
 );
 
+drop policy if exists itineraries_create on public.itineraries;
 create policy itineraries_create
 on public.itineraries
 for insert
 with check (
   auth.uid() = user_id
-  or exists (
-    select 1 from public.profiles p
-    where p.id = auth.uid() and p.role = 'admin'
-  )
+  or public.is_admin()
 );
 
+drop policy if exists itineraries_update_own on public.itineraries;
 create policy itineraries_update_own
 on public.itineraries
 for update
 using (
   auth.uid() = user_id
-  or exists (
-    select 1 from public.profiles p
-    where p.id = auth.uid() and p.role = 'admin'
-  )
+  or public.is_admin()
 );
 
+drop policy if exists itineraries_delete_own on public.itineraries;
 create policy itineraries_delete_own
 on public.itineraries
 for delete
 using (
   auth.uid() = user_id
-  or exists (
-    select 1 from public.profiles p
-    where p.id = auth.uid() and p.role = 'admin'
-  )
+  or public.is_admin()
 );
 
 -- Place reviews table
@@ -332,49 +297,41 @@ create table if not exists public.place_reviews (
 
 alter table public.place_reviews enable row level security;
 
+drop policy if exists place_reviews_select on public.place_reviews;
 create policy place_reviews_select
 on public.place_reviews
 for select
 using (
   approved = true
   or auth.uid() = user_id
-  or exists (
-    select 1 from public.profiles p
-    where p.id = auth.uid() and p.role = 'admin'
-  )
+  or public.is_admin()
 );
 
+drop policy if exists place_reviews_insert on public.place_reviews;
 create policy place_reviews_insert
 on public.place_reviews
 for insert
 with check (
   auth.uid() = user_id
-  or exists (
-    select 1 from public.profiles p
-    where p.id = auth.uid() and p.role = 'admin'
-  )
+  or public.is_admin()
 );
 
+drop policy if exists place_reviews_update on public.place_reviews;
 create policy place_reviews_update
 on public.place_reviews
 for update
 using (
   auth.uid() = user_id
-  or exists (
-    select 1 from public.profiles p
-    where p.id = auth.uid() and p.role = 'admin'
-  )
+  or public.is_admin()
 );
 
+drop policy if exists place_reviews_delete on public.place_reviews;
 create policy place_reviews_delete
 on public.place_reviews
 for delete
 using (
   auth.uid() = user_id
-  or exists (
-    select 1 from public.profiles p
-    where p.id = auth.uid() and p.role = 'admin'
-  )
+  or public.is_admin()
 );
 
 -- Keep updated_at in sync for place reviews
@@ -407,9 +364,7 @@ on public.place_favorites
 for select
 using (
   auth.uid() = user_id
-  or exists (
-    select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin'
-  )
+  or public.is_admin()
 );
 
 drop policy if exists place_favorites_insert on public.place_favorites;
@@ -418,9 +373,7 @@ on public.place_favorites
 for insert
 with check (
   auth.uid() = user_id
-  or exists (
-    select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin'
-  )
+  or public.is_admin()
 );
 
 drop policy if exists place_favorites_delete on public.place_favorites;
@@ -429,9 +382,7 @@ on public.place_favorites
 for delete
 using (
   auth.uid() = user_id
-  or exists (
-    select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin'
-  )
+  or public.is_admin()
 );
 
 create index if not exists idx_place_favorites_user_id on public.place_favorites(user_id);
@@ -469,78 +420,66 @@ alter table public.blog_posts enable row level security;
 alter table public.blog_comments enable row level security;
 
 -- Blog posts RLS policies
+drop policy if exists blog_posts_select_published on public.blog_posts;
 create policy blog_posts_select_published
 on public.blog_posts
 for select
 using (published = true);
 
+drop policy if exists blog_posts_select_own_draft on public.blog_posts;
 create policy blog_posts_select_own_draft
 on public.blog_posts
 for select
 using (
   auth.uid() = author_id
-  or exists (
-    select 1 from public.profiles p
-    where p.id = auth.uid() and p.role = 'admin'
-  )
+  or public.is_admin()
 );
 
+drop policy if exists blog_posts_insert_admin on public.blog_posts;
 create policy blog_posts_insert_admin
 on public.blog_posts
 for insert
-with check (
-  exists (
-    select 1 from public.profiles p
-    where p.id = auth.uid() and p.role = 'admin'
-  )
-);
+with check (public.is_admin());
 
+drop policy if exists blog_posts_update_admin on public.blog_posts;
 create policy blog_posts_update_admin
 on public.blog_posts
 for update
 using (
   auth.uid() = author_id
-  or exists (
-    select 1 from public.profiles p
-    where p.id = auth.uid() and p.role = 'admin'
-  )
+  or public.is_admin()
 );
 
+drop policy if exists blog_posts_delete_admin on public.blog_posts;
 create policy blog_posts_delete_admin
 on public.blog_posts
 for delete
-using (
-  exists (
-    select 1 from public.profiles p
-    where p.id = auth.uid() and p.role = 'admin'
-  )
-);
+using (public.is_admin());
 
 -- Blog comments RLS policies
+drop policy if exists blog_comments_select on public.blog_comments;
 create policy blog_comments_select
 on public.blog_comments
 for select
 using (approved = true or auth.uid() = author_id);
 
+drop policy if exists blog_comments_insert on public.blog_comments;
 create policy blog_comments_insert
 on public.blog_comments
 for insert
 with check (auth.uid() = author_id);
 
+drop policy if exists blog_comments_delete_own on public.blog_comments;
 create policy blog_comments_delete_own
 on public.blog_comments
 for delete
 using (auth.uid() = author_id);
 
+drop policy if exists blog_comments_delete_admin on public.blog_comments;
 create policy blog_comments_delete_admin
 on public.blog_comments
 for delete
-using (
-  exists (
-    select 1 from public.profiles p
-    where p.id = auth.uid() and p.role = 'admin'
-  )
-);
+using (public.is_admin());
 
 -- Helpful indexes for session-based chat lookup and foreign keys
 create index if not exists idx_profiles_role on public.profiles(role);
