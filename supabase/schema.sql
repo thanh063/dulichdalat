@@ -106,13 +106,22 @@ after insert on auth.users
 for each row
 execute function public.handle_new_user();
 
--- Helper: check if current user is admin (reads jwt.claims.role)
+-- Helper: check if current user is admin
 create or replace function public.is_admin()
 returns boolean
-language sql
+language plpgsql
 security definer
+set search_path = public
 as $$
-  (current_setting('jwt.claims', true)::json ->> 'role') = 'admin';
+declare
+  is_admin boolean;
+begin
+  select (role = 'admin') into is_admin 
+  from public.profiles 
+  where id = auth.uid();
+  
+  return coalesce(is_admin, false);
+end;
 $$;
 
 -- Enable RLS
@@ -139,13 +148,13 @@ drop policy if exists profiles_select on public.profiles;
 create policy profiles_select
 on public.profiles
 for select
-using (auth.uid() = id or public.is_admin());
+using (true); -- Mở quyền đọc profile để tránh lỗi vòng lặp vô hạn (infinite recursion)
 
 drop policy if exists profiles_update on public.profiles;
 create policy profiles_update
 on public.profiles
 for update
-using (auth.uid() = id or public.is_admin());
+using (auth.uid() = id);
 
 -- If you ever create profiles from client-side signup flows, keep this.
 drop policy if exists profiles_insert_own on public.profiles;
