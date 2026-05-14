@@ -1,7 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
+import FavoriteButton from "@/components/favorites/favorite-button";
 import { notFound } from "next/navigation";
 import places from "@/data/dalat.json";
+import PlaceReviewSection from "@/components/reviews/place-review-section";
 
 type PlaceRecord = {
   slug: string;
@@ -191,6 +193,9 @@ export default async function PlaceDetailPage({ params }: { params: Promise<{ sl
             >
               Mở bản đồ
             </a>
+            <div className="flex items-center">
+              <FavoriteButton slug={place.slug} />
+            </div>
           </div>
         </aside>
       </section>
@@ -259,6 +264,8 @@ export default async function PlaceDetailPage({ params }: { params: Promise<{ sl
           ))}
         </div>
       </section>
+
+      <PlaceReviewSection slug={place.slug} placeName={place.name} />
 
       <section className="mt-12 rounded-4xl border border-pine-500/10 bg-white p-8 shadow-[0_20px_60px_rgba(26,47,15,0.08)]">
         <p className="text-sm font-semibold uppercase tracking-[0.3em] text-pine-700">Mẹo nhanh</p>

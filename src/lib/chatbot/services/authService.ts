@@ -45,8 +45,42 @@ export async function registerUser(input: RegisterInput): Promise<{
   user?: AuthProfile;
 }> {
   const supabase = getSupabaseAdminClient();
+  
+  // If admin client not available, try public client
   if (!supabase) {
-    return { success: false, message: "Chưa cấu hình Supabase admin client." };
+    const publicClient = getPublicAuthClient();
+    if (!publicClient) {
+      return { success: false, message: "Chưa cấu hình Supabase." };
+    }
+
+    const { data, error } = await publicClient.auth.signUp({
+      email: input.email,
+      password: input.password,
+      options: {
+        data: {
+          name: input.name,
+          phone: input.phone,
+          address: input.address || "",
+        },
+      },
+    });
+
+    if (error || !data.user) {
+      return { success: false, message: error?.message || "Không thể tạo tài khoản." };
+    }
+
+    return {
+      success: true,
+      message: "Đăng ký thành công.",
+      user: {
+        id: data.user.id,
+        name: input.name,
+        email: input.email,
+        phone: input.phone,
+        address: input.address,
+        role: "user",
+      },
+    };
   }
 
   const { data, error } = await supabase.auth.admin.createUser({

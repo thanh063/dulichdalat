@@ -24,6 +24,7 @@ export default function LoginPage() {
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(form),
       });
 
@@ -33,11 +34,12 @@ export default function LoginPage() {
       }
 
       if (typeof window !== "undefined") {
-        window.localStorage.setItem(
-          "dalat_user",
-          JSON.stringify((data as { profile?: { id: string; name: string; email: string; phone: string; address: string; role: string } }).profile ?? null),
-        );
-        window.dispatchEvent(new Event("dalat-user-changed"));
+        const profileData = (data as { profile?: { id: string; name: string; email: string; phone: string; address: string; role: string } }).profile;
+        if (profileData) {
+          window.localStorage.setItem("dalat_user", JSON.stringify(profileData));
+          console.log("[Login] Saved user to localStorage:", profileData);
+          window.dispatchEvent(new Event("dalat-user-changed"));
+        }
       }
 
       router.push("/");

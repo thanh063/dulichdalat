@@ -62,7 +62,12 @@ Yêu cầu:
 Chỉ trả lại JSON, không có giải thích.`;
 
     const response = await model.generateContent(prompt);
-    const text = response.content.blocks[0]?.text || "";
+    const text =
+      typeof response.response?.text === "function"
+        ? response.response.text()
+        : response.response?.candidates?.[0]?.content?.parts
+            ?.map((part: { text?: string }) => part.text ?? "")
+            .join("") ?? "";
 
     // Parse JSON từ response
     const jsonMatch = text.match(/\{[\s\S]*\}/);

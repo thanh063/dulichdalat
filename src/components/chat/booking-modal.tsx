@@ -30,6 +30,7 @@ export function BookingModal({ open, onOpenChange, placeName, bookingType, onBoo
       const response = await fetch("/api/book", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           place_name: placeName,
           type: bookingType,

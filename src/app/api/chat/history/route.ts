@@ -33,7 +33,9 @@ export async function GET(request: NextRequest) {
     .order("created_at", { ascending: true });
 
   if (error) {
-    return NextResponse.json({ success: false, history: [] }, { status: 500 });
+    console.error("Chat history error:", error);
+    // Return empty history instead of error if table doesn't exist
+    return NextResponse.json({ success: true, history: [] });
   }
 
   return NextResponse.json({ success: true, history: data ?? [] });

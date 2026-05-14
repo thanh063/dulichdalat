@@ -141,7 +141,7 @@ export function ChatWidget({ mode = "floating", autoSend = null }: ChatWidgetPro
       }
 
       try {
-        const response = await fetch(`/api/chat/history?sid=${encodeURIComponent(session.id)}`);
+        const response = await fetch(`/api/chat/history?sid=${encodeURIComponent(session.id)}`, { credentials: "include" });
         const data = (await response.json()) as { success?: boolean; history?: ChatHistoryItem[] };
         if (!response.ok || data.success === false || !Array.isArray(data.history) || data.history.length === 0) {
           setHistoryLoaded(true);
@@ -178,6 +178,7 @@ export function ChatWidget({ mode = "floating", autoSend = null }: ChatWidgetPro
       const response = await fetch("/api/ai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           q: "",
           sid: session.id,
@@ -235,6 +236,7 @@ export function ChatWidget({ mode = "floating", autoSend = null }: ChatWidgetPro
       const response = await fetch("/api/ai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ q: text.trim(), sid: session.id }),
       });
 
@@ -265,6 +267,7 @@ export function ChatWidget({ mode = "floating", autoSend = null }: ChatWidgetPro
       await fetch("/api/chat/history", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ sid: session.id, sender, message, userId: session.userId }),
       });
     } catch {
@@ -278,7 +281,7 @@ export function ChatWidget({ mode = "floating", autoSend = null }: ChatWidgetPro
 
     try {
       if (session.id) {
-        await fetch(`/api/chat/history?sid=${encodeURIComponent(session.id)}`, { method: "DELETE" });
+        await fetch(`/api/chat/history?sid=${encodeURIComponent(session.id)}`, { method: "DELETE", credentials: "include" });
       }
     } catch {
       // ignore delete failures

@@ -92,7 +92,7 @@ export default function AdminBookingsPage() {
     setRefreshing(true);
 
     try {
-      const response = await fetch("/api/admin/bookings", { cache: "no-store" });
+      const response = await fetch("/api/admin/bookings", { cache: "no-store", credentials: "include" });
       const data = (await response.json()) as ApiResponse;
 
       if (!response.ok) {

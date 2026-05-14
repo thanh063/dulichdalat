@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import places from "@/data/dalat.json";
+import FavoriteButton from "@/components/favorites/favorite-button";
 
 type PlaceRecord = {
   slug: string;
@@ -130,6 +131,7 @@ export default function PlacesPage() {
                 >
                   Hỏi AI 🌿
                 </Link>
+                <FavoriteButton slug={place.slug} size="sm" />
               </div>
             </div>
           </article>

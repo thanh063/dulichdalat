@@ -6,7 +6,8 @@ import { useMemo, useState, useSyncExternalStore } from "react";
 
 const navigation = [
   { href: "/", label: "Trang Chủ" },
-  { href: "/places", label: "Địa Điểm" },
+  { href: "/places", label: "Khám Phá" },
+  { href: "/blog", label: "Blog" },
   { href: "/dat-tour", label: "Đặt Tour" },
   { href: "/chat", label: "Chat" },
 ];
@@ -66,6 +67,9 @@ export function Header() {
           { href: "/dashboard", label: "Dashboard" },
           { href: "/admin/bookings", label: "Quản Lý" },
         ]
+      : []),
+    ...(user
+      ? [{ href: "/yeu-thich", label: "Yêu Thích" }]
       : []),
   ];
 

@@ -68,6 +68,7 @@ export function DashboardBookingList({ bookings }: Props) {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({ status }),
       });
 

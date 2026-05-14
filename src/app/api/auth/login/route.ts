@@ -39,12 +39,23 @@ export async function POST(request: NextRequest) {
         });
 
         if (!retry.error && retry.data.user) {
-          return NextResponse.json({
+          const response = NextResponse.json({
             success: true,
             message: "Đăng nhập thành công.",
             user: retry.data.user,
+            profile: await getUserProfile(retry.data.user.id, retry.data.user.user_metadata?.name || "Khách", retry.data.user.email || parsed.data.email),
             session: retry.data.session,
           });
+
+          if (retry.data.session?.access_token) {
+            const secure = process.env.NODE_ENV === "production" ? "Secure;" : "";
+            const match = process.env.NEXT_PUBLIC_SUPABASE_URL?.match(/https?:\/\/([^.]+)\.supabase\.co/);
+            const projectId = match ? match[1] : "default";
+            const cookieValue = `sb-${projectId}-auth-token=${retry.data.session.access_token}; Path=/; ${secure}SameSite=Lax; Max-Age=${60 * 60 * 24 * 365}`;
+            response.headers.set("Set-Cookie", cookieValue);
+          }
+
+          return response;
         }
 
         return NextResponse.json({ success: false, message: retry.error?.message || "Không thể đăng nhập." });
@@ -56,13 +67,24 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: false, message: error.message });
   }
 
-  return NextResponse.json({
+  const response = NextResponse.json({
     success: true,
     message: "Đăng nhập thành công.",
     user: data.user,
     profile: await getUserProfile(data.user.id, data.user.user_metadata?.name || "Khách", data.user.email || parsed.data.email),
     session: data.session,
   });
+
+  if (data.session?.access_token) {
+    // Set Supabase session cookies for SSR compatibility
+    const secure = process.env.NODE_ENV === "production" ? "Secure;" : "";
+    const match = process.env.NEXT_PUBLIC_SUPABASE_URL?.match(/https?:\/\/([^.]+)\.supabase\.co/);
+    const projectId = match ? match[1] : "default";
+    const cookieValue = `sb-${projectId}-auth-token=${data.session.access_token}; Path=/; ${secure}SameSite=Lax; Max-Age=${60 * 60 * 24 * 365}`;
+    response.headers.set("Set-Cookie", cookieValue);
+  }
+
+  return response;
 }
 
 function isDevAuthAutoConfirmEnabled() {

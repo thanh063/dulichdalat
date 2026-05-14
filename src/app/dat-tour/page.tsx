@@ -59,6 +59,7 @@ export default function DatTourPage() {
         const response = await fetch("/api/itineraries/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({
             startDate,
             durationDays,
@@ -126,6 +127,7 @@ export default function DatTourPage() {
       const response = await fetch("/api/itineraries/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           title,
           startDate: itinerary.startDate,
@@ -192,7 +194,7 @@ export default function DatTourPage() {
   return (
     <div className="mx-auto max-w-6xl px-6 py-10 sm:px-10 lg:px-12">
       {/* Header */}
-      <section className="rounded-[2rem] border border-pine-500/10 bg-white/80 p-8 shadow-[0_20px_60px_rgba(26,47,15,0.08)]">
+      <section className="rounded-4xl border border-pine-500/10 bg-white/80 p-8 shadow-[0_20px_60px_rgba(26,47,15,0.08)]">
         <p className="text-sm font-semibold uppercase tracking-[0.3em] text-pine-700">Đặt Tour Đà Lạt</p>
         <h1 className="mt-4 font-display text-5xl text-pine-900">Tạo Lịch Trình Du Lịch Hoàn Hảo</h1>
         <p className="mt-3 max-w-3xl text-base leading-8 text-smoke">
@@ -223,7 +225,7 @@ export default function DatTourPage() {
 
       {/* Step 1: Choose Date & Duration */}
       {currentStep === 1 && (
-        <section className="mt-10 rounded-[2rem] border border-pine-500/10 bg-white p-8 shadow-[0_20px_60px_rgba(26,47,15,0.08)]">
+        <section className="mt-10 rounded-4xl border border-pine-500/10 bg-white p-8 shadow-[0_20px_60px_rgba(26,47,15,0.08)]">
           <h2 className="font-heading text-3xl text-pine-900">Bước 1: Chọn Ngày & Số Ngày</h2>
           <div className="mt-8 grid gap-6 md:grid-cols-2">
             <div>
@@ -281,7 +283,7 @@ export default function DatTourPage() {
 
       {/* Step 2: Edit Itinerary */}
       {currentStep === 2 && (
-        <section className="mt-10 rounded-[2rem] border border-pine-500/10 bg-white p-8 shadow-[0_20px_60px_rgba(26,47,15,0.08)]">
+        <section className="mt-10 rounded-4xl border border-pine-500/10 bg-white p-8 shadow-[0_20px_60px_rgba(26,47,15,0.08)]">
           <h2 className="font-heading text-3xl text-pine-900">Bước 2: Tạo & Tuỳ Chỉnh Lịch Trình</h2>
 
           {itinerary.loading && (
@@ -419,7 +421,7 @@ export default function DatTourPage() {
 
       {/* Step 3: Review & Save */}
       {currentStep === 3 && (
-        <section className="mt-10 rounded-[2rem] border border-pine-500/10 bg-white p-8 shadow-[0_20px_60px_rgba(26,47,15,0.08)]">
+        <section className="mt-10 rounded-4xl border border-pine-500/10 bg-white p-8 shadow-[0_20px_60px_rgba(26,47,15,0.08)]">
           <h2 className="font-heading text-3xl text-pine-900">Bước 3: Tổng Quan & Lưu</h2>
 
           {!shareLink ? (

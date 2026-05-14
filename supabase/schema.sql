@@ -269,6 +269,11 @@ create table if not exists public.itineraries (
 -- RLS policies for itineraries
 alter table public.itineraries enable row level security;
 
+drop policy if exists itineraries_own on public.itineraries;
+drop policy if exists itineraries_create on public.itineraries;
+drop policy if exists itineraries_update_own on public.itineraries;
+drop policy if exists itineraries_delete_own on public.itineraries;
+
 create policy itineraries_own
 on public.itineraries
 for select
@@ -282,6 +287,10 @@ on public.itineraries
 for insert
 with check (
   auth.uid() = user_id
+  or exists (
+    select 1 from public.profiles p
+    where p.id = auth.uid() and p.role = 'admin'
+  )
 );
 
 create policy itineraries_update_own
@@ -289,6 +298,10 @@ on public.itineraries
 for update
 using (
   auth.uid() = user_id
+  or exists (
+    select 1 from public.profiles p
+    where p.id = auth.uid() and p.role = 'admin'
+  )
 );
 
 create policy itineraries_delete_own
@@ -296,6 +309,237 @@ on public.itineraries
 for delete
 using (
   auth.uid() = user_id
+  or exists (
+    select 1 from public.profiles p
+    where p.id = auth.uid() and p.role = 'admin'
+  )
+);
+
+-- Place reviews table
+create table if not exists public.place_reviews (
+  id bigserial primary key,
+  place_slug text not null,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  user_name text not null default 'Khách',
+  rating integer not null check (rating between 1 and 5),
+  content text not null,
+  image_url text,
+  approved boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (place_slug, user_id)
+);
+
+alter table public.place_reviews enable row level security;
+
+create policy place_reviews_select
+on public.place_reviews
+for select
+using (
+  approved = true
+  or auth.uid() = user_id
+  or exists (
+    select 1 from public.profiles p
+    where p.id = auth.uid() and p.role = 'admin'
+  )
+);
+
+create policy place_reviews_insert
+on public.place_reviews
+for insert
+with check (
+  auth.uid() = user_id
+  or exists (
+    select 1 from public.profiles p
+    where p.id = auth.uid() and p.role = 'admin'
+  )
+);
+
+create policy place_reviews_update
+on public.place_reviews
+for update
+using (
+  auth.uid() = user_id
+  or exists (
+    select 1 from public.profiles p
+    where p.id = auth.uid() and p.role = 'admin'
+  )
+);
+
+create policy place_reviews_delete
+on public.place_reviews
+for delete
+using (
+  auth.uid() = user_id
+  or exists (
+    select 1 from public.profiles p
+    where p.id = auth.uid() and p.role = 'admin'
+  )
+);
+
+-- Keep updated_at in sync for place reviews
+
+drop trigger if exists trg_place_reviews_updated_at on public.place_reviews;
+create trigger trg_place_reviews_updated_at
+before update on public.place_reviews
+for each row
+execute function public.set_updated_at();
+
+-- Helpful indexes for reviews
+create index if not exists idx_place_reviews_place_slug on public.place_reviews(place_slug);
+create index if not exists idx_place_reviews_user_id on public.place_reviews(user_id);
+create index if not exists idx_place_reviews_approved on public.place_reviews(approved);
+
+-- Place favorites (user bookmarks)
+create table if not exists public.place_favorites (
+  id bigserial primary key,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  place_slug text not null,
+  created_at timestamptz not null default now(),
+  unique (user_id, place_slug)
+);
+
+alter table public.place_favorites enable row level security;
+
+drop policy if exists place_favorites_select on public.place_favorites;
+create policy place_favorites_select
+on public.place_favorites
+for select
+using (
+  auth.uid() = user_id
+  or exists (
+    select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin'
+  )
+);
+
+drop policy if exists place_favorites_insert on public.place_favorites;
+create policy place_favorites_insert
+on public.place_favorites
+for insert
+with check (
+  auth.uid() = user_id
+  or exists (
+    select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin'
+  )
+);
+
+drop policy if exists place_favorites_delete on public.place_favorites;
+create policy place_favorites_delete
+on public.place_favorites
+for delete
+using (
+  auth.uid() = user_id
+  or exists (
+    select 1 from public.profiles p where p.id = auth.uid() and p.role = 'admin'
+  )
+);
+
+create index if not exists idx_place_favorites_user_id on public.place_favorites(user_id);
+create index if not exists idx_place_favorites_place_slug on public.place_favorites(place_slug);
+
+-- Blog posts table
+create table if not exists public.blog_posts (
+  id bigserial primary key,
+  author_id uuid not null references public.profiles(id) on delete cascade,
+  slug text unique not null,
+  title text not null,
+  excerpt text not null,
+  content text not null,
+  cover_image text not null,
+  tags text[] not null default '{}',
+  published boolean not null default false,
+  published_at timestamptz,
+  view_count integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+-- Blog comments table
+create table if not exists public.blog_comments (
+  id bigserial primary key,
+  post_id bigint not null references public.blog_posts(id) on delete cascade,
+  author_id uuid not null references public.profiles(id) on delete cascade,
+  content text not null,
+  approved boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+-- Enable RLS for blog tables
+alter table public.blog_posts enable row level security;
+alter table public.blog_comments enable row level security;
+
+-- Blog posts RLS policies
+create policy blog_posts_select_published
+on public.blog_posts
+for select
+using (published = true);
+
+create policy blog_posts_select_own_draft
+on public.blog_posts
+for select
+using (
+  auth.uid() = author_id
+  or exists (
+    select 1 from public.profiles p
+    where p.id = auth.uid() and p.role = 'admin'
+  )
+);
+
+create policy blog_posts_insert_admin
+on public.blog_posts
+for insert
+with check (
+  exists (
+    select 1 from public.profiles p
+    where p.id = auth.uid() and p.role = 'admin'
+  )
+);
+
+create policy blog_posts_update_admin
+on public.blog_posts
+for update
+using (
+  auth.uid() = author_id
+  or exists (
+    select 1 from public.profiles p
+    where p.id = auth.uid() and p.role = 'admin'
+  )
+);
+
+create policy blog_posts_delete_admin
+on public.blog_posts
+for delete
+using (
+  exists (
+    select 1 from public.profiles p
+    where p.id = auth.uid() and p.role = 'admin'
+  )
+);
+
+-- Blog comments RLS policies
+create policy blog_comments_select
+on public.blog_comments
+for select
+using (approved = true or auth.uid() = author_id);
+
+create policy blog_comments_insert
+on public.blog_comments
+for insert
+with check (auth.uid() = author_id);
+
+create policy blog_comments_delete_own
+on public.blog_comments
+for delete
+using (auth.uid() = author_id);
+
+create policy blog_comments_delete_admin
+on public.blog_comments
+for delete
+using (
+  exists (
+    select 1 from public.profiles p
+    where p.id = auth.uid() and p.role = 'admin'
+  )
 );
 
 -- Helpful indexes for session-based chat lookup and foreign keys
@@ -306,3 +550,8 @@ create index if not exists idx_bookings_user_id on public.bookings(user_id);
 create index if not exists idx_admin_notifications_booking_id on public.admin_notifications(booking_id);
 create index if not exists idx_itineraries_user_id on public.itineraries(user_id);
 create index if not exists idx_itineraries_share_token on public.itineraries(share_token);
+create index if not exists idx_blog_posts_slug on public.blog_posts(slug);
+create index if not exists idx_blog_posts_author_id on public.blog_posts(author_id);
+create index if not exists idx_blog_posts_published on public.blog_posts(published);
+create index if not exists idx_blog_comments_post_id on public.blog_comments(post_id);
+create index if not exists idx_blog_comments_author_id on public.blog_comments(author_id);

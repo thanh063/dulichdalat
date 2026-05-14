@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
-import { handleMessage } from "@/lib/chatbot/legacy/handler";
+import { handleMessage } from "@/lib/chatbot/handler";
 
 const requestSchema = z.object({
   q: z.string().optional().default(""),
